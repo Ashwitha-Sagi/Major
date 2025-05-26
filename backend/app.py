@@ -13,8 +13,8 @@ CORS(app)
 
 # === Load Model and Class Names ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, '..', 'model', 'xception_plant_model.h5')
-CLASS_NAMES_PATH = os.path.join(BASE_DIR, '..', 'model', 'class_names.txt')
+MODEL_PATH = os.path.join(BASE_DIR, 'model', 'xception_plant_model.h5')
+CLASS_NAMES_PATH = os.path.join(BASE_DIR, 'model', 'class_names.txt')
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
