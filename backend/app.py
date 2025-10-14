@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import os
 import numpy as np
@@ -7,29 +7,29 @@ from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.xception import preprocess_input
 from PIL import Image
 
-# === App Setup ===
+# === Setup ===
 app = Flask(__name__)
 CORS(app)
 
-# === Load Model and Class Names ===
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, '..','model', 'xception_plant_model.h5')
-CLASS_NAMES_PATH = os.path.join(BASE_DIR, '..','model', 'class_names.txt')
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+# === Load Model ===
+MODEL_PATH = os.path.join('model', 'xception_plant_model.h5')
+model = load_model(MODEL_PATH)
+
+# === Load Class Names ===
+CLASS_NAMES_PATH = os.path.join('model', 'class_names.txt')
+with open(CLASS_NAMES_PATH, 'r') as f:
+    class_names = [line.strip() for line in f.readlines()]
+
+# === Upload folder ===
+UPLOAD_FOLDER = os.path.join('uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-try:
-    model = load_model(MODEL_PATH)
-except Exception as e:
-    raise RuntimeError(f"Failed to load model: {e}")
+# === Serve the HTML page ===
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-try:
-    with open(CLASS_NAMES_PATH, 'r') as f:
-        class_names = [line.strip() for line in f.readlines()]
-except Exception as e:
-    raise RuntimeError(f"Failed to load class names: {e}")
-
-# === Prediction Endpoint ===
+# === Predict route ===
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'file' not in request.files:
@@ -43,23 +43,21 @@ def predict():
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(file_path)
 
-        # Preprocess image
         img = Image.open(file_path).convert('RGB')
         img = img.resize((224, 224))
         img_array = image.img_to_array(img)
         img_array = np.expand_dims(img_array, axis=0)
         img_array = preprocess_input(img_array)
 
-        # Predict
-        preds = model.predict(img_array)
-        pred_index = int(np.argmax(preds))
-        pred_class = class_names[pred_index]
-        return jsonify({'prediction': pred_class})
+        prediction = model.predict(img_array)
+        predicted_index = np.argmax(prediction)
+        predicted_class = class_names[predicted_index]
+
+        return jsonify({'prediction': predicted_class})
 
     except Exception as e:
-        return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
+        return jsonify({'error': str(e)}), 500
 
-# === Main ===
+# === Run Server ===
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Render uses $PORT
-    app.run(debug=False, host='0.0.0.0', port=port)
+    app.run(debug=True)

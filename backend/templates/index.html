@@ -6,17 +6,12 @@
   <title>Medicinal Plant Classifier</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600&display=swap" rel="stylesheet" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
       font-family: 'Quicksand', sans-serif;
       background: #f0fdf4;
       color: #333;
     }
-
     header {
       background: #15803d;
       color: white;
@@ -24,13 +19,11 @@
       padding: 1em 0;
       font-size: 1.8em;
     }
-
     .container {
       max-width: 800px;
-      margin: 0 auto;
+      margin: auto;
       padding: 2em;
     }
-
     .upload-section {
       background: white;
       padding: 2em;
@@ -38,7 +31,6 @@
       text-align: center;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
-
     .upload-row {
       display: flex;
       justify-content: center;
@@ -47,7 +39,6 @@
       flex-wrap: wrap;
       margin-bottom: 1em;
     }
-
     input[type="file"] {
       background: #fef3c7;
       padding: 10px;
@@ -55,7 +46,6 @@
       border-radius: 8px;
       font-size: 1em;
     }
-
     button {
       background: #16a34a;
       color: white;
@@ -64,13 +54,10 @@
       font-size: 1em;
       border-radius: 10px;
       cursor: pointer;
-      transition: 0.3s;
     }
-
     button:hover {
       background-color: #15803d;
     }
-
     #preview {
       margin: 20px auto;
       display: none;
@@ -78,7 +65,6 @@
       border-radius: 12px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.1);
     }
-
     #result {
       margin-top: 1em;
       font-weight: bold;
@@ -86,20 +72,16 @@
       color: #2563eb;
       text-align: center;
     }
-
     footer {
       text-align: center;
       padding: 2em 0;
       color: #555;
-      font-size: 0.9em;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    🌿 Medicinal Plant Detection
-  </header>
+  <header>🌿 Medicinal Plant Detection</header>
 
   <div class="container">
     <div class="upload-section">
@@ -107,15 +89,12 @@
         <input type="file" id="fileInput" accept="image/*" />
         <button onclick="uploadImage()">🔍 Predict</button>
       </div>
-
       <img id="preview" alt="Preview" />
       <div id="result"></div>
     </div>
   </div>
 
-  <footer>
-    Made with 💚 using Flask & AI
-  </footer>
+  <footer>Made with 💚 using Flask & AI</footer>
 
   <script>
     const fileInput = document.getElementById('fileInput');
@@ -144,20 +123,17 @@
       result.textContent = "⏳ Detecting...";
 
       try {
-        const response = await fetch("http://127.0.0.1:5000/predict", {
+        const response = await fetch("/predict", {
           method: "POST",
           body: formData
         });
 
         const data = await response.json();
-        const prediction = data.prediction || data.plant;
-
-        if (prediction) {
-          result.innerHTML = "✅ <b>Detected Plant: " + prediction + "</b>";
+        if (data.prediction) {
+          result.innerHTML = "✅ <b>Detected Plant: " + data.prediction + "</b>";
         } else {
           result.textContent = "❌ Detection failed.";
         }
-
       } catch (err) {
         console.error(err);
         result.textContent = "⚠️ Server error.";
